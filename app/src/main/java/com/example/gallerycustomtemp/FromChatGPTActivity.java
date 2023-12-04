@@ -1,14 +1,19 @@
 package com.example.gallerycustomtemp;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 
@@ -21,6 +26,9 @@ import java.util.List;
 
 public class FromChatGPTActivity extends AppCompatActivity {
 
+    private static final String TAG = "Test_code";
+    private static final int MY_READ_PERMISSION_CODE = 100;
+
     private Button addBtn;
     private RecyclerView recyclerView;
     private List<String> mediaList = new ArrayList<>();
@@ -32,7 +40,10 @@ public class FromChatGPTActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_from_chat_gptactivity);
         setReferences();
-        getMediaFromGallery();
+        checkPermissions();
+
+
+//        getMediaFromGallery();
 
 //        adapter = new MediaChatGTPAdapter(getBaseContext(), mediaList);
         adapter = new MediaChatGTPAdapter(getBaseContext(), mediaItemList, new MediaChatGTPAdapter.NumberSelectedCallBack() {
@@ -132,6 +143,34 @@ public class FromChatGPTActivity extends AppCompatActivity {
                 mediaItemList.add(mediaItem);
             } while (cursor.moveToNext());
             cursor.close();
+        }
+    }
+
+    private void checkPermissions() {
+        if (ContextCompat.checkSelfPermission(getBaseContext(), Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, MY_READ_PERMISSION_CODE);
+        } else {
+            Log.d(TAG, "checkPermissions: READ_EXTERNAL_STORAGE Permission already granted.");
+            getMediaFromGallery();
+        }
+
+        /**
+         * From API 29+ need use new permissions: READ_MEDIA_IMAGES, READ_MEDIA_VIDEO, READ_MEDIA_AUDIO.
+         * READ_EXTERNAL_STORAGE - not working anymore.
+         */
+
+        if (ContextCompat.checkSelfPermission(getBaseContext(), android.Manifest.permission.READ_MEDIA_IMAGES) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, MY_READ_PERMISSION_CODE);
+        } else {
+            Log.d(TAG, "checkPermissions: READ_MEDIA_IMAGES Permission already granted.");
+
+            if (ContextCompat.checkSelfPermission(getBaseContext(), android.Manifest.permission.READ_MEDIA_VIDEO) != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.READ_MEDIA_VIDEO}, MY_READ_PERMISSION_CODE);
+            } else {
+
+                Log.d(TAG, "checkPermissions: READ_MEDIA_VIDEO Permission already granted.");
+                getMediaFromGallery();
+            }
         }
     }
 }

@@ -24,7 +24,7 @@ import java.util.List;
 public class DisplayPhotosFromGalleryActivity extends AppCompatActivity {
 
     private static final String TAG = "Test_code";
-    private static final int MY_READ_PERMISSION_CODE = 101;
+    private static final int MY_READ_PERMISSION_CODE = 100;
 
     private TextView gallery_number;
     private RecyclerView recyclerView;
@@ -39,7 +39,7 @@ public class DisplayPhotosFromGalleryActivity extends AppCompatActivity {
         setContentView(R.layout.activity_display_photos_from_gallery);
         setReferences();
 
-        if (ContextCompat.checkSelfPermission(getBaseContext(), Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+        if (ContextCompat.checkSelfPermission(getBaseContext(), Manifest.permission.READ_MEDIA_IMAGES) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(DisplayPhotosFromGalleryActivity.this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, MY_READ_PERMISSION_CODE);
         } else {
           loadImages();
@@ -54,9 +54,13 @@ public class DisplayPhotosFromGalleryActivity extends AppCompatActivity {
         if (requestCode == MY_READ_PERMISSION_CODE) {
             if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 Toast.makeText(getBaseContext(), "Read external storage permission granted", Toast.LENGTH_SHORT).show();
+                Log.d(TAG, "onRequestPermissionsResult: Read external storage permission granted. Can read.");
                 loadImages();
             } else {
                 Toast.makeText(getBaseContext(), "Read external storage permission denied", Toast.LENGTH_SHORT).show();
+                Log.d(TAG, "onRequestPermissionsResult: Read external storage permission denied. FAIL.");
+                ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.READ_MEDIA_IMAGES}, MY_READ_PERMISSION_CODE);
+//                ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.READ_EXTERNAL_STORAGE}, MY_READ_PERMISSION_CODE);
             }
         }
     }
