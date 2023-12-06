@@ -40,7 +40,8 @@ public class DisplayPhotosFromGalleryActivity extends AppCompatActivity {
         setReferences();
 
         if (ContextCompat.checkSelfPermission(getBaseContext(), Manifest.permission.READ_MEDIA_IMAGES) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(DisplayPhotosFromGalleryActivity.this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, MY_READ_PERMISSION_CODE);
+            Log.d(TAG, "onCreate: Ask permission out of method.");
+            ActivityCompat.requestPermissions(DisplayPhotosFromGalleryActivity.this, new String[]{Manifest.permission.READ_MEDIA_IMAGES}, MY_READ_PERMISSION_CODE);
         } else {
           loadImages();
         }
@@ -52,14 +53,14 @@ public class DisplayPhotosFromGalleryActivity extends AppCompatActivity {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 
         if (requestCode == MY_READ_PERMISSION_CODE) {
-            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 Toast.makeText(getBaseContext(), "Read external storage permission granted", Toast.LENGTH_SHORT).show();
                 Log.d(TAG, "onRequestPermissionsResult: Read external storage permission granted. Can read.");
                 loadImages();
             } else {
                 Toast.makeText(getBaseContext(), "Read external storage permission denied", Toast.LENGTH_SHORT).show();
                 Log.d(TAG, "onRequestPermissionsResult: Read external storage permission denied. FAIL.");
-                ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.READ_MEDIA_IMAGES}, MY_READ_PERMISSION_CODE);
+//                ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.READ_MEDIA_IMAGES}, MY_READ_PERMISSION_CODE);
 //                ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.READ_EXTERNAL_STORAGE}, MY_READ_PERMISSION_CODE);
             }
         }

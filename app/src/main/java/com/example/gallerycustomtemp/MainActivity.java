@@ -25,7 +25,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         setReferences();
-        checkPermissions();
+//        checkPermissions();
 
         youtube1Btn.setOnClickListener(new View.OnClickListener() {
             @Override

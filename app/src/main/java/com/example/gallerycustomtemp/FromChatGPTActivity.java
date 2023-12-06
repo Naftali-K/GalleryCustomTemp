@@ -1,5 +1,6 @@
 package com.example.gallerycustomtemp;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -16,6 +17,7 @@ import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.Toast;
 
 import com.example.gallerycustomtemp.adapters.MediaChatGTPAdapter;
 import com.example.gallerycustomtemp.models.MediaItem;
@@ -34,16 +36,23 @@ public class FromChatGPTActivity extends AppCompatActivity {
     private List<String> mediaList = new ArrayList<>();
     private List<MediaItem> mediaItemList = new ArrayList<>();
     private MediaChatGTPAdapter adapter;
+    private String[] PERMISSIONS_LIST;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_from_chat_gptactivity);
         setReferences();
-        checkPermissions();
+        PERMISSIONS_LIST = new String[] {
+                Manifest.permission.READ_EXTERNAL_STORAGE,
+                Manifest.permission.READ_MEDIA_IMAGES,
+                Manifest.permission.READ_MEDIA_VIDEO
+        };
+
+        requestPermissions();
 
 
-//        getMediaFromGallery();
+        getMediaFromGallery();
 
 //        adapter = new MediaChatGTPAdapter(getBaseContext(), mediaList);
         adapter = new MediaChatGTPAdapter(getBaseContext(), mediaItemList, new MediaChatGTPAdapter.NumberSelectedCallBack() {
@@ -146,30 +155,33 @@ public class FromChatGPTActivity extends AppCompatActivity {
         }
     }
 
-    private void checkPermissions() {
-        if (ContextCompat.checkSelfPermission(getBaseContext(), Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, MY_READ_PERMISSION_CODE);
-        } else {
-            Log.d(TAG, "checkPermissions: READ_EXTERNAL_STORAGE Permission already granted.");
-            getMediaFromGallery();
+    private boolean hasPermission(String[] permissions) {
+
+        if (permissions != null) {
+            for (String permission: permissions) {
+                if (ContextCompat.checkSelfPermission(getBaseContext(), permission) != PackageManager.PERMISSION_GRANTED) {
+                    return false;
+                }
+            }
         }
 
-        /**
-         * From API 29+ need use new permissions: READ_MEDIA_IMAGES, READ_MEDIA_VIDEO, READ_MEDIA_AUDIO.
-         * READ_EXTERNAL_STORAGE - not working anymore.
-         */
+        return true;
+    }
 
-        if (ContextCompat.checkSelfPermission(getBaseContext(), android.Manifest.permission.READ_MEDIA_IMAGES) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, MY_READ_PERMISSION_CODE);
-        } else {
-            Log.d(TAG, "checkPermissions: READ_MEDIA_IMAGES Permission already granted.");
+    private void requestPermissions() {
+        if (!hasPermission(PERMISSIONS_LIST)) {
+            Log.d(TAG, "requestPermissions: ask list of permissions");
+            ActivityCompat.requestPermissions(this, PERMISSIONS_LIST, MY_READ_PERMISSION_CODE);
+        }
+    }
 
-            if (ContextCompat.checkSelfPermission(getBaseContext(), android.Manifest.permission.READ_MEDIA_VIDEO) != PackageManager.PERMISSION_GRANTED) {
-                ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.READ_MEDIA_VIDEO}, MY_READ_PERMISSION_CODE);
-            } else {
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 
-                Log.d(TAG, "checkPermissions: READ_MEDIA_VIDEO Permission already granted.");
-                getMediaFromGallery();
+        if (requestCode == MY_READ_PERMISSION_CODE) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                Log.d(TAG, "onRequestPermissionsResult: All permissions ACCEPTED");
             }
         }
     }
